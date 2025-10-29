@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load form_tags %}
+
+{% block style %}
+    {% if form.employees %}
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+        <style>
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                background-color: #dbeafe;
+                border-color: #1930C3;
+                color: #4d6bfe;
+            }
+        </style>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Создание документов</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- ОСНОВНОЕ ОТЛИЧИЕ: В Django используем csrf_token вместо form.hidden_tag() -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <!-- Выбор сотрудников -->
+                                {% if form.employees %}
+                                    <div class="col-12">
+                                        {{ form.employees|add_label_class }}
+                                        {{ form.employees }}
+                                        {% if form.employees.errors %}
+                                            <div class="text-danger">
+                                                {{ form.employees.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% elif form.employee %}
+                                    {{ form.employee|add_label_class }}
+                                    {{ form.employee }}
+                                {% endif %}
+                                {% if form.objective %}
+                                    <!-- Цель командировки -->
+                                    <div class="col-md-12">
+                                        {{ form.objective|add_label_class }}
+                                        {{ form.objective }}
+                                        {% if form.objective.errors %}
+                                            <div class="text-danger">
+                                                {{ form.objective.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Дата и продолжительность -->
+                                <div class="col-md-6">
+                                    {{ form.start_date|add_label_class }}
+                                    {{ form.start_date }}
+                                    {% if form.start_date.errors %}
+                                        <div class="text-danger">
+                                            {{ form.start_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.days|add_label_class }}
+                                    {{ form.days }}
+                                    {% if form.days.errors %}
+                                        <div class="text-danger">
+                                            {{ form.days.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Место назначения -->
+                                <div class="col-12">
+                                    {{ form.destination|add_label_class }}
+                                    {{ form.destination }}
+                                    {% if form.destination.errors %}
+                                        <div class="text-danger">
+                                            {{ form.destination.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12" id="other-destination-group" style="display: none;">
+                                    {{ form.other_destination|add_label_class }}
+                                    {{ form.other_destination }}
+                                    {% if form.other_destination.errors %}
+                                        <div class="text-danger">
+                                            {{ form.other_destination.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        {{ form.add_weekend|add_label_class }}
+                                        {{ form.add_weekend }}
+                                    </div>
+                                    {% if form.add_weekend.errors %}
+                                        <div class="text-danger">
+                                            {{ form.add_weekend.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- ОТЛИЧИЕ: В Django обычно кнопку создаем вручную -->
+                                <input class="btn btn-primary" id="submit" name="submit" type="submit" value="Создать">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Этот код остается практически без изменений
+        const destinationSelect = document.getElementById('{{ form.destination.id_for_label }}');
+        const otherDestinationGroup = document.getElementById('other-destination-group');
+
+        if (destinationSelect) {
+            destinationSelect.addEventListener('change', function () {
+                if (this.value === 'other') {
+                    otherDestinationGroup.style.display = 'block';
+                } else {
+                    otherDestinationGroup.style.display = 'none';
+                }
+            });
+
+            // Инициализируем видимость при загрузке
+            if (destinationSelect.value === 'other') {
+                otherDestinationGroup.style.display = 'block';
+            }
+        }
+    </script>
+
+    {% if form.employees %}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                // ОТЛИЧИЕ: Используем id поля из Django формы
+                $('#{{ form.employees.id_for_label }}').select2({
+                    placeholder: "Выберите сотрудников",
+                    allowClear: true,
+                    width: '100%',
+                });
+            });
+        </script>
+    {% endif %}
+
+    {% if form.employee %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Обработка изменения сотрудника
+                const employeeSelect = document.getElementById('{{ form.employee.id_for_label }}');
+                const objectiveField = document.getElementById('{{ form.objective.id_for_label }}');
+
+                function updateObjective() {
+                    const employeeId = employeeSelect.value;
+                    if (employeeId) {
+                        // ОТЛИЧИЕ: Используем Django URL через data-атрибут или переменную
+                        const url = "{% url 'documents_generator:get_employee_data' 0 %}".replace('0', employeeId);
+                        fetch(url)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.objective && objectiveField) {
+                                    objectiveField.value = data.objective;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    }
+                }
+
+                // Запустить при загрузке, если есть выбранный сотрудник
+                if (employeeSelect.value) {
+                    updateObjective();
+                }
+
+                // Запускать при изменении выбора
+                if (employeeSelect) {
+                    employeeSelect.addEventListener('change', updateObjective);
+                }
+            });
+        </script>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block link %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+{% endblock %}
+{% block content %}
+    <div class="container py-5">
+        <h1 class="mb-4 text-center"><i class="bi bi-files"></i> Система документооборота</h1>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Маршрутные листы -->
+            <div class="col">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-map"></i> Маршрутные листы</h5>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'documents_generator:single_route' %}" class="btn btn-outline-primary w-100 mb-2">
+                                Для одного сотрудника
+                            </a>
+                            <a href="{% url 'documents_generator:multi_route' %}" class="btn btn-outline-primary w-100 mb-2">
+                                Для нескольких сотрудников
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Техника безопасности -->
+            <div class="col">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-shield-check"></i> Техника безопасности</h5>
+                        <a href="#" class="btn btn-outline-primary w-100 mb-2"> Акт готовности </a>
+                        <a href="#" class="btn btn-outline-primary w-100 mb-2"> Расписка в ознакомлении </a>
+                        <a href="#" class="btn btn-outline-primary w-100 mb-2"> Протокол проверки знаний </a>
+                        <a href="#" class="btn btn-outline-primary w-100 mb-2"> Информационный бланк </a>
+                        <a href="#" class="btn btn-outline-primary w-100 mb-2"> Весь пакет </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Заявки -->
+            <div class="col">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-clipboard-check"></i> Заявки </h5>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-outline-primary">На аванс</a>
+                            <a href="#" class="btn btn-outline-primary">На транспорт</a>
+                            <a href="#" class="btn btn-outline-primary">На питьевую воду</a>
+                            <a href="#" class="btn btn-outline-primary">На хоз. принадлежности</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Пакет документов -->
+            <div class="col">
+                <div class="card h-100 shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="bi bi-archive"></i> Пакет документов</h5>
+                        <p class="text-muted">Автоматическая генерация полного пакета</p>
+                        <a href="{% url 'index:in_development' %}" class="btn btn-primary">Сформировать пакет</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
